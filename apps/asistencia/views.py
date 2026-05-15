@@ -124,7 +124,6 @@ class ResumenDiarioViewSet(viewsets.ReadOnlyModelViewSet):
 class ReporteAsistenciaView(APIView):
     """
     📑 Reporte operativo de asistencia por período (Semanal/Mensual).
-    Cumple con el Objetivo Específico 7 del plan de trabajo.
     """
     permission_classes = [permissions.IsAuthenticated, IsPropietarioOrPersonal]
 
@@ -195,7 +194,7 @@ class ClientesActivosView(APIView):
         # 3. Construimos la lista de activos
         activos = []
         for registro in ultimos:
-            # ✅ CORRECCIÓN: Usar get_tipo_display() en lugar de .tipo_display
+            # Usar get_tipo_display() en lugar de .tipo_display
             membresia_nombre = registro.membresia.get_tipo_display() if registro.membresia else 'Sin membresía'
             
             activos.append({

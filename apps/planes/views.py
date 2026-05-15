@@ -141,7 +141,10 @@ class HistorialPlanViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = HistorialPlanUsuarioSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [filters.OrderingFilter]
+    
+    # Filtros: Búsqueda y ordenamiento
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['usuario__first_name', 'usuario__last_name', 'plan__nombre']
     ordering_fields = ['fecha_asignacion']
     ordering = ['-fecha_asignacion']
 
@@ -149,6 +152,13 @@ class HistorialPlanViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         queryset = HistorialPlanUsuario.objects.select_related('usuario', 'plan')
 
+        # FILTRO POR ESTADO (desde query params)
+        estado = self.request.query_params.get('estado', None)
+        if estado:
+            queryset = queryset.filter(estado=estado)
+
+        # Filtro por rol de usuario
         if user.role == 'CLIENTE':
-            return queryset.filter(usuario=user)
-        return queryset.all()
+            queryset = queryset.filter(usuario=user)
+        
+        return queryset

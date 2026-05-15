@@ -35,7 +35,7 @@ class RegistroAsistenciaCreateSerializer(serializers.ModelSerializer):
             'usuario', 'membresia', 'tipo_registro', 
             'metodo_ingreso', 'observaciones'
         ]
-        # 🔧 CORRECCIÓN: Hacer que membresia sea opcional para que el ViewSet la busque
+        # 🔧 Hacer que membresia sea opcional para que el ViewSet la busque
         extra_kwargs = {
             'membresia': {'required': False, 'allow_null': True}
         }

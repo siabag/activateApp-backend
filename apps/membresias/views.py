@@ -134,7 +134,6 @@ class MembresiaViewSet(viewsets.ModelViewSet):
 class MisMembresiasView(APIView):
     """
     Endpoint para que el cliente vea solo sus membresías.
-    Más simple y seguro que usar el ViewSet con filtros.
     """
     permission_classes = [permissions.IsAuthenticated]
 

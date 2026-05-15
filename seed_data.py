@@ -8,7 +8,7 @@ import sys
 import django
 from datetime import datetime, timedelta
 from decimal import Decimal
-from django.utils import timezone  # Esencial para manejar zonas horarias
+from django.utils import timezone 
 
 # Configurar Django para que pueda importar los modelos
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'activate_backend.settings')
