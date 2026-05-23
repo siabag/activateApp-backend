@@ -9,9 +9,20 @@ class UsuarioManager(BaseUserManager):
         if not email:
             raise ValueError('El correo electrónico es obligatorio')
         email = self.normalize_email(email)
+        
+        # 🔍 DEBUG: Imprimir qué rol llega al modelo
+        print(f"🛠️ MODELO create_user: email={email}, role_recibido={extra_fields.get('role')}")
+        
+        # ✅ Blindaje: Si por alguna razón no llega el rol, asignar CLIENTE por defecto
+        if 'role' not in extra_fields:
+            extra_fields['role'] = 'CLIENTE'
+            
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+        
+        # 🔍 DEBUG: Confirmar con qué rol se guardó realmente
+        print(f"✅ MODELO save: Usuario {user.email} guardado con rol: {user.role}")
         return user
     
     def create_superuser(self, email, password=None, **extra_fields):
@@ -25,6 +36,7 @@ class UsuarioManager(BaseUserManager):
             raise ValueError('Un superusuario debe tener is_superuser=True')
         
         return self.create_user(email, password, **extra_fields)
+
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     """

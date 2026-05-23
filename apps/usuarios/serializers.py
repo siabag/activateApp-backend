@@ -27,7 +27,8 @@ class UsuarioBaseSerializer(serializers.ModelSerializer):
 
 class UsuarioRegistroSerializer(serializers.ModelSerializer):
     """
-    Serializer para el registro de nuevos usuarios.
+    Serializer para el registro y creación de nuevos usuarios.
+    Permite asignar roles (Propietario, Personal, Cliente).
     Incluye validación de contraseña y campos requeridos.
     """
     password = serializers.CharField(
@@ -48,7 +49,8 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'email', 'first_name', 'last_name', 'telefono', 
-            'role', 'password', 'password_confirm',
+            'role',  # ✅ Campo role incluido para asignación manual
+            'password', 'password_confirm',
             'peso', 'altura'
         ]
 
@@ -58,6 +60,10 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "password": "Las contraseñas no coinciden."
             })
+        
+        # ✅ Si no se envía un rol, por defecto se crea como CLIENTE
+        if 'role' not in attrs:
+            attrs['role'] = 'CLIENTE'
         
         # Validar que si se proporciona peso, también se proporcione altura (para calcular IMC)
         if attrs.get('peso') and not attrs.get('altura'):
@@ -101,7 +107,7 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
         
         # Usar create_user para hashear la contraseña
         usuario = Usuario.objects.create_user(
-            password=password,  # Ahora se hashea automáticamente
+            password=password,
             **validated_data
         )
         
@@ -172,7 +178,7 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
 class UsuarioAdminSerializer(serializers.ModelSerializer):
     """
     Serializer completo para administración por parte del propietario/personal.
-    Incluye todos los campos y permite gestión completa.
+    Incluye todos los campos y permite gestión completa (incluyendo cambio de rol).
     """
     role_display = serializers.CharField(source='get_role_display', read_only=True)
     nombre_completo = serializers.SerializerMethodField()
@@ -192,6 +198,7 @@ class UsuarioAdminSerializer(serializers.ModelSerializer):
             'date_joined', 'last_login',
             'groups', 'user_permissions'
         ]
+        # ✅ 'role' NO está en read_only_fields, por lo tanto es escribible por el admin
         read_only_fields = ['id', 'date_joined', 'last_login', 'imc']
 
     def get_nombre_completo(self, obj):

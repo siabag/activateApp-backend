@@ -245,3 +245,42 @@ class HistorialMembresiaViewSet(viewsets.ReadOnlyModelViewSet):
         if membresia_id:
             return HistorialMembresia.objects.filter(membresia_id=membresia_id)
         return HistorialMembresia.objects.all()
+
+class ValidarMembresiasVencidasView(APIView):
+    """
+    Endpoint para validar y actualizar membresías vencidas.
+    Se llama automáticamente desde el frontend al cargar datos del cliente.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from apps.membresias.utils import actualizar_membresias_vencidas
+        
+        count = actualizar_membresias_vencidas()
+        
+        return Response({
+            'detail': f'Se actualizaron {count} membresías vencidas',
+            'actualizadas': count
+        })
+
+
+class MisMembresiasActualizadasView(APIView):
+    """
+    Endpoint optimizado para clientes: 
+    1. Valida membresías vencidas automáticamente
+    2. Retorna solo las membresías del usuario logueado
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Primero validar y actualizar si es necesario
+        from apps.membresias.utils import actualizar_membresias_vencidas
+        actualizar_membresias_vencidas()
+        
+        # Luego retornar las membresías del usuario
+        membresias = Membresia.objects.filter(
+            usuario=request.user
+        ).order_by('-fecha_inicio')
+        
+        serializer = MembresiaDetailSerializer(membresias, many=True)
+        return Response(serializer.data)
